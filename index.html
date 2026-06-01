@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Analyzer — Territorio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">Lead<br>Analyzer</span>
+    </div>
+
+    <div class="sidebar-section">
+      <label class="field-label">API Key Google Places</label>
+      <div class="api-key-wrap">
+        <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+        <button class="btn-icon" id="toggleKey" title="Mostra/nascondi" onclick="toggleKeyVisibility()">👁</button>
+      </div>
+      <p class="hint">
+        <a href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com" target="_blank">Ottieni chiave gratuita →</a>
+      </p>
+    </div>
+
+    <div class="sidebar-section">
+      <label class="field-label">Indirizzo di partenza</label>
+      <input type="text" id="startAddress" value="Cascina Valdarenne 10, Vanzago MI" />
+      <button class="btn-secondary" id="btnGeocode" onclick="geocodeStart()">📍 Localizza</button>
+      <div id="geocodeStatus" class="geocode-status"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <label class="field-label">Categoria</label>
+      <input type="text" id="categoria" value="aziende" placeholder="es: ristoranti, officine..." />
+    </div>
+
+    <div class="sidebar-section">
+      <label class="field-label">Raggio di ricerca</label>
+      <div class="raggio-wrap">
+        <input type="range" id="raggio" min="500" max="20000" step="500" value="5000" oninput="updateRaggioLabel()" />
+        <span class="raggio-label" id="raggioLabel">5 km</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <label class="field-label">Max risultati</label>
+      <select id="maxResults">
+        <option value="20">20</option>
+        <option value="40" selected>40</option>
+        <option value="60">60</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" id="btnCerca" onclick="cercaAziende()">
+      <span id="btnCercaText">🔍 Cerca aziende</span>
+    </button>
+
+    <div class="sidebar-section" style="margin-top: auto; padding-top: 2rem;">
+      <p class="hint">Le chiavi API non vengono salvate — rimangono solo nel tuo browser.</p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="metrics" id="metrics">
+        <div class="metric"><span class="metric-val" id="mTot">—</span><span class="metric-lbl">trovate</span></div>
+        <div class="metric"><span class="metric-val" id="mSito">—</span><span class="metric-lbl">con sito</span></div>
+        <div class="metric"><span class="metric-val" id="mRating">—</span><span class="metric-lbl">rating medio</span></div>
+        <div class="metric"><span class="metric-val" id="mOpen">—</span><span class="metric-lbl">aperte ora</span></div>
+      </div>
+      <div class="topbar-actions">
+        <input type="text" class="search-inline" id="fSearch" placeholder="Filtra risultati..." oninput="renderTable()" />
+        <select id="fSito" onchange="renderTable()">
+          <option value="">Tutti</option>
+          <option value="si">Con sito</option>
+          <option value="no">Senza sito</option>
+        </select>
+        <button class="btn-secondary" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn-secondary" id="btnAnalizza" onclick="analizzaTutte()" disabled>🤖 Analizza con AI</button>
+      </div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar" id="statusBar" style="display:none">
+      <div class="spinner"></div>
+      <span id="statusMsg">In elaborazione...</span>
+      <span id="statusPct" class="status-pct"></span>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th onclick="sort('name')" class="sortable">Azienda <span class="sa" id="sa-name"></span></th>
+            <th onclick="sort('tipo')" class="sortable">Tipo <span class="sa" id="sa-tipo"></span></th>
+            <th onclick="sort('rating')" class="sortable">Rating <span class="sa" id="sa-rating"></span></th>
+            <th onclick="sort('dist')" class="sortable">km <span class="sa" id="sa-dist">▲</span></th>
+            <th>Indirizzo</th>
+            <th>Telefono</th>
+            <th>Sito web</th>
+            <th>Segnali</th>
+            <th onclick="sort('score')" class="sortable">Score <span class="sa" id="sa-score"></span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row">
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-icon">◈</div>
+                <p>Configura la chiave API, l'indirizzo e clicca <strong>Cerca aziende</strong></p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel" style="display:none">
+      <div class="detail-header">
+        <div>
+          <h2 id="dNome">—</h2>
+          <p id="dTipo" class="detail-tipo">—</p>
+        </div>
+        <button class="btn-icon" onclick="closeDetail()">✕</button>
+      </div>
+
+      <div class="detail-grid" id="dGrid"></div>
+
+      <div class="detail-signals" id="dSignals"></div>
+
+      <div class="detail-analysis" id="dAnalysis" style="display:none">
+        <h3 class="section-title">Analisi AI</h3>
+        <div id="dAnalysisContent"></div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn-secondary" id="dBtnAnalizza" onclick="analizzaSingola()">🤖 Analizza questo sito</button>
+        <button class="btn-secondary" id="dBtnMaps" onclick="openMaps()">🗺 Apri su Maps</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
