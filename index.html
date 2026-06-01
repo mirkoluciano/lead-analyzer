@@ -20,26 +20,29 @@
     </div>
 
     <div class="sidebar-section">
-      <label class="field-label">API Key Google Places</label>
+      <label class="field-label">API Key Google Maps</label>
       <div class="api-key-wrap">
         <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
-        <button class="btn-icon" id="toggleKey" title="Mostra/nascondi" onclick="toggleKeyVisibility()">👁</button>
+        <button class="btn-icon" title="Mostra/nascondi" onclick="toggleKeyVisibility()">👁</button>
       </div>
+      <button class="btn-secondary" style="margin-top:6px" onclick="loadGoogleMaps()">⚡ Carica Maps SDK</button>
+      <div id="mapsStatus" class="geocode-status"></div>
       <p class="hint">
-        <a href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com" target="_blank">Ottieni chiave gratuita →</a>
+        Abilita: <strong>Maps JavaScript API</strong> + <strong>Places API</strong><br>
+        <a href="https://console.cloud.google.com/apis/library" target="_blank">Vai a Cloud Console →</a>
       </p>
     </div>
 
     <div class="sidebar-section">
       <label class="field-label">Indirizzo di partenza</label>
       <input type="text" id="startAddress" value="Cascina Valdarenne 10, Vanzago MI" />
-      <button class="btn-secondary" id="btnGeocode" onclick="geocodeStart()">📍 Localizza</button>
+      <button class="btn-secondary" id="btnGeocode" onclick="geocodeStart()" disabled>📍 Localizza</button>
       <div id="geocodeStatus" class="geocode-status"></div>
     </div>
 
     <div class="sidebar-section">
-      <label class="field-label">Categoria</label>
-      <input type="text" id="categoria" value="aziende" placeholder="es: ristoranti, officine..." />
+      <label class="field-label">Categoria / Keyword</label>
+      <input type="text" id="categoria" value="ristoranti" placeholder="es: ristoranti, officine..." />
     </div>
 
     <div class="sidebar-section">
@@ -59,12 +62,12 @@
       </select>
     </div>
 
-    <button class="btn-primary" id="btnCerca" onclick="cercaAziende()">
-      <span id="btnCercaText">🔍 Cerca aziende</span>
+    <button class="btn-primary" id="btnCerca" onclick="cercaAziende()" disabled>
+      🔍 Cerca aziende
     </button>
 
-    <div class="sidebar-section" style="margin-top: auto; padding-top: 2rem;">
-      <p class="hint">Le chiavi API non vengono salvate — rimangono solo nel tuo browser.</p>
+    <div class="sidebar-section" style="margin-top:auto;padding-top:2rem">
+      <p class="hint">Le chiavi API rimangono solo nel tuo browser (sessionStorage).</p>
     </div>
   </aside>
 
@@ -73,7 +76,7 @@
 
     <!-- TOPBAR -->
     <div class="topbar">
-      <div class="metrics" id="metrics">
+      <div class="metrics">
         <div class="metric"><span class="metric-val" id="mTot">—</span><span class="metric-lbl">trovate</span></div>
         <div class="metric"><span class="metric-val" id="mSito">—</span><span class="metric-lbl">con sito</span></div>
         <div class="metric"><span class="metric-val" id="mRating">—</span><span class="metric-lbl">rating medio</span></div>
@@ -119,7 +122,7 @@
             <td colspan="9">
               <div class="empty-state">
                 <div class="empty-icon">◈</div>
-                <p>Configura la chiave API, l'indirizzo e clicca <strong>Cerca aziende</strong></p>
+                <p>Inserisci la chiave API, clicca <strong>Carica Maps SDK</strong><br>poi <strong>Localizza</strong> e infine <strong>Cerca aziende</strong></p>
               </div>
             </td>
           </tr>
@@ -136,25 +139,22 @@
         </div>
         <button class="btn-icon" onclick="closeDetail()">✕</button>
       </div>
-
       <div class="detail-grid" id="dGrid"></div>
-
       <div class="detail-signals" id="dSignals"></div>
-
       <div class="detail-analysis" id="dAnalysis" style="display:none">
         <h3 class="section-title">Analisi AI</h3>
         <div id="dAnalysisContent"></div>
       </div>
-
       <div class="detail-actions">
         <button class="btn-secondary" id="dBtnAnalizza" onclick="analizzaSingola()">🤖 Analizza questo sito</button>
-        <button class="btn-secondary" id="dBtnMaps" onclick="openMaps()">🗺 Apri su Maps</button>
+        <button class="btn-secondary" onclick="openMaps()">🗺 Apri su Maps</button>
       </div>
     </div>
 
   </main>
 </div>
 
+<!-- Google Maps JS API viene caricato dinamicamente da app.js -->
 <script src="app.js"></script>
 </body>
 </html>
