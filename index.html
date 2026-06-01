@@ -10,7 +10,38 @@
 </head>
 <body>
 
-<div class="app">
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="logo-icon">◈</span>
+    </div>
+    <h1 class="login-title">Lead Analyzer</h1>
+    <p class="login-sub">Accesso riservato</p>
+
+    <div class="login-field">
+      <input
+        type="password"
+        id="login-password"
+        placeholder="Password"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <button class="btn-primary login-btn" id="login-btn" onclick="submitLogin()">
+      Accedi
+    </button>
+
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     APP (nascosta fino al login)
+══════════════════════════════════════════════════════════ -->
+<div class="app" id="app" style="display:none">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -29,7 +60,7 @@
       <div id="mapsStatus" class="geocode-status"></div>
       <p class="hint">
         Abilita: <strong>Maps JavaScript API</strong> + <strong>Places API</strong><br>
-        <a href="https://console.cloud.google.com/apis/library" target="_blank">Vai a Cloud Console →</a>
+        <a href="https://console.cloud.google.com/apis/library" target="_blank">Cloud Console →</a>
       </p>
     </div>
 
@@ -67,14 +98,14 @@
     </button>
 
     <div class="sidebar-section" style="margin-top:auto;padding-top:2rem">
-      <p class="hint">Le chiavi API rimangono solo nel tuo browser (sessionStorage).</p>
+      <button class="btn-secondary" style="width:100%;opacity:.6" onclick="logout()">⎋ Esci</button>
+      <p class="hint" style="margin-top:8px">Le chiavi API rimangono solo nel browser.</p>
     </div>
   </aside>
 
   <!-- MAIN -->
   <main class="main">
 
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="metrics">
         <div class="metric"><span class="metric-val" id="mTot">—</span><span class="metric-lbl">trovate</span></div>
@@ -94,14 +125,12 @@
       </div>
     </div>
 
-    <!-- STATUS BAR -->
     <div class="status-bar" id="statusBar" style="display:none">
       <div class="spinner"></div>
       <span id="statusMsg">In elaborazione...</span>
       <span id="statusPct" class="status-pct"></span>
     </div>
 
-    <!-- TABLE -->
     <div class="table-container">
       <table id="mainTable">
         <thead>
@@ -122,7 +151,7 @@
             <td colspan="9">
               <div class="empty-state">
                 <div class="empty-icon">◈</div>
-                <p>Inserisci la chiave API, clicca <strong>Carica Maps SDK</strong><br>poi <strong>Localizza</strong> e infine <strong>Cerca aziende</strong></p>
+                <p>Carica il SDK Maps, localizza e cerca</p>
               </div>
             </td>
           </tr>
@@ -130,7 +159,6 @@
       </table>
     </div>
 
-    <!-- DETAIL PANEL -->
     <div class="detail-panel" id="detailPanel" style="display:none">
       <div class="detail-header">
         <div>
@@ -154,7 +182,16 @@
   </main>
 </div>
 
-<!-- Google Maps JS API viene caricato dinamicamente da app.js -->
+<script src="login.js"></script>
 <script src="app.js"></script>
+<script>
+  // Avvia il controllo login appena il DOM è pronto
+  document.addEventListener('DOMContentLoaded', initLogin);
+
+  function logout() {
+    sessionStorage.removeItem('la_auth');
+    showLoginScreen();
+  }
+</script>
 </body>
 </html>
